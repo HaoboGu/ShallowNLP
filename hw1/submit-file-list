@@ -1,0 +1,5 @@
+eng_tokenizer.sh
+make_voc.sh
+ex2.tok
+ex2.tok.voc
+ex2.voc
