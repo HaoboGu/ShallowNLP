@@ -9,14 +9,22 @@ This script is a tokenizer used to split texts to words by punctuations/whitespa
 import sys
 import re
 
+def add_whitespace(match):
+    return ' ' + match.group(0) + ' '
 def tokenize(string, abbrev_file):
-    regex = ' '
+    regex = '\W'
     punctuations = ['.', ',', '-', '%', '#', '!', '=', '$', '&']
     pattern = re.compile(regex) # compile a regex to a pattern
-    match = pattern.match(line)
-    if match:
-        # if there is somerhing in line matches pattern
-        print(match.groups())
+    words = string.split(' ')
+    splitted = ''
+    for item in words:
+        if not item:
+            continue
+        item = pattern.sub(add_whitespace, item)
+        splitted = splitted + ' ' + item + ' '
+    print(splitted)
+    splitted = re.sub(" +", " ", splitted) # delete extra whitespaces
+    print(splitted)
     return 1
 
 def create_abbrev_list(abbrev_file):
@@ -60,6 +68,6 @@ if __name__ == "__main__":
         if len(args) == 0:
             print("No abbrev-list file!")
         else:
-            process(args[0])    
-            
+            # process(args[0])    
+            tokenize('i love you- ---that asd1#sa', 1)
         # n_lines_from_stdin(n)
