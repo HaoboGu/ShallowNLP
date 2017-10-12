@@ -1,0 +1,19 @@
+Let's test numbers: -1, 3.14159, -23, -532.2, 1,000,495.23, -1,000.
+    From the slides: -4, 1.23, 1,234, 1950s.
+
+Let's test email addresses: arglebargle@foobar.com@bleet.dat
+    From the slides: xx@uw.edu
+
+Let's test url's: http://x.com, ftp://ftpsource.net/index, 
+    https://samplemarket.com/user1/cart/buy.html
+    From the slides: http://www.Washington.edu/
+
+Let's test paths: /etc/passwd, C:/foo/bar/bletch, C:\system\data, ~/Downloads, ./.zsh/.zshcfg
+    From the slides: C:/dropbox/17-18/570/hw1/
+
+Let's test abbreviations: Nov., A.B., The Man from U.N.C.L.E.
+    From the slides: Ph.D.
+
+Let's test fractions: 3/4, 3/4%, -3/4%.
+
+Let's test contractions: isn't, I'd, I'll, wouldn't, fund's, funds', fo'c's'le
