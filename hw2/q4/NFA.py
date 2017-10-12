@@ -1,6 +1,9 @@
 # !/usr/bin/python
 
-import sys
+import queue
+from optparse import OptionParser
+
+
 def parse_arc(line):
     words = line.split(' ')
     start = words[0].strip("(")
@@ -10,7 +13,7 @@ def parse_arc(line):
     arc = arc.strip("\"")
     return start, end, arc
 
-import queue
+
 class NFA:
     states = []
     arcs = []
@@ -53,6 +56,7 @@ class NFA:
                 q.put(item)
         return closure
 
+
 class DFA:
     states = []
     arcs = []  # (start, end, symbol)
@@ -78,28 +82,25 @@ class DFA:
                 return e[1]
         return -1
 
-    def set_fianl_state(self, final_state_nfa):
+    def set_final_state(self, final_state_nfa):
         self.final_state = []
         for item in self.states:
             if final_state_nfa in item:
                 self.final_state.append(item)
 
     def receive(self, input_line):
-        input_line.strip('\n')
+        input_line = input_line.strip('\n')
         symbols = input_line.split(' ')
         symbols = [item.strip('"') for item in symbols]
         current = self.start_state
         for item in symbols:
-            next_state = self.move(current, item)
-            if next_state == -1:
-                return False
-            else:
-                current = next_state
-
+            if item != "*e*":
+                next_state = self.move(current, item)
+                if next_state == -1:
+                    return False
+                else:
+                    current = next_state
         return (current in self.final_state)
-
-
-
 
 
 def read_nfa(nfa_filename):
@@ -119,7 +120,6 @@ def read_nfa(nfa_filename):
         line = nfa_file.readline()
     nfa_file.close()
     return nfa
-
 
 
 def convert_nfa2dfa(nfa_filename):
@@ -146,25 +146,29 @@ def convert_nfa2dfa(nfa_filename):
                 if next_states:
                     dfa.add_arc((current, next_states, i))
                     # print(current, i, next_states)
-    dfa.set_fianl_state(nfa.final_state)
+    dfa.set_final_state(nfa.final_state)
     return dfa
 
 
 if __name__ == "__main__":
-    from optparse import OptionParser
-
     parser = OptionParser(__doc__)
     options, args = parser.parse_args()
-    args = "asd"
-    if len(args) == 0:
+    if len(args) == 1:
         print("please specify input file")
     else:
+        # nfa_filename = "fsa1"
+        # input_filename = 'ex'
         nfa_filename = args[0]
-        input_line = args[1]
-        nfa_filename = "fsa1.1"
-        input_line = '"a" "a" "b" "b"'
-
-        dfa = convert_nfa2dfa(nfa_filename)
-        print(dfa.receive(input_line))
-
+        input_filename = args[1]
+        input_file = open(input_filename)
+        input_line = input_file.readline()
+        while input_line:
+            input_line = input_line.strip('\n')
+            dfa = convert_nfa2dfa(nfa_filename)
+            # print(dfa.final_state)
+            if dfa.receive(input_line):
+                print(input_line, "==> yes")
+            else:
+                print(input_line, "==> no")
+            input_line = input_file.readline()
 

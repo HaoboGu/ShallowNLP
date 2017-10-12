@@ -1,0 +1,20 @@
+"a" "a" "b" ==> yes
+"a" "a" ==> yes
+"b" ==> yes
+"a" "b" "a" ==> no
+"a" "c" ==> no
+"a" "a" "b" ==> no
+"a" "a" ==> no
+"b" ==> no
+"a" "b" "a" ==> no
+"a" "c" ==> yes
+"a" "a" "b" ==> no
+"a" "a" ==> no
+"b" ==> yes
+"a" "b" "a" ==> no
+"a" "c" ==> yes
+"a" "a" "b" ==> no
+"a" "a" ==> no
+"b" ==> no
+"a" "b" "a" ==> yes
+"a" "c" ==> no
