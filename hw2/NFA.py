@@ -167,8 +167,8 @@ if __name__ == "__main__":
             dfa = convert_nfa2dfa(nfa_filename)
             # print(dfa.final_state)
             if dfa.receive(input_line):
-                print(input_line, "==> yes")
+                print(input_line, "=> yes")
             else:
-                print(input_line, "==> no")
+                print(input_line, "=> no")
             input_line = input_file.readline()
 

@@ -1,5 +1,6 @@
 "a" "a" "b" ==> no
 "a" "a" ==> no
-"b" ==> no
+"b" ==> yes
 "a" "b" "a" ==> no
 "a" "c" ==> yes
+*e* ==> yes
