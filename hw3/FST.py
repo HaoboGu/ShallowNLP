@@ -4,38 +4,6 @@ from optparse import OptionParser
 import re
 
 
-def parse_arc(sequence, is_first):
-    words = sequence.split(' ')
-    words = [word.strip("(") for word in words if word.strip("(")]
-    words = [word.strip(")") for word in words if word.strip(")")]
-    if is_first and words.__len__() == 4:  # with start state but without prob
-        words.append(1)
-        return words
-    elif is_first and words.__len__() == 5:  # with start state and prob
-        return words
-    elif not is_first and words.__len__() == 3:  # without start state and prob
-        words.append(1)
-        return words
-    elif not is_first and words.__len__() == 4:  # without start state but with prob
-        return words
-    else:
-        print("Error: input line is illegal")
-
-
-def parse_line(line):
-    line = re.sub(" +", " ", line)
-    line = re.sub("\) \(", "\n", line)
-    arcs = line.split('\n')
-    transitions = []
-    info = parse_arc(arcs[0], True)  # parse first node (with start state)
-    start = info[0]
-    transitions.append((start, info[1], info[2], info[3], info[4]))
-    for arc in arcs[1:]:
-        info = parse_arc(arc, False)
-        transitions.append((start, info[0], info[1], info[2], info[3]))  # nodes in one line share one start state
-    return transitions
-
-
 class FST:
     states = []
     transitions = []  # [(start, end, input, output, probability)]
@@ -111,7 +79,6 @@ class FST:
         """
         input_line = input_line.strip('\n')
         symbols = input_line.split(' ')
-
         state_pool = {}  # {state:([string], prob)}
         state_pool[self.start_state] = ("", 1)
         for symbol in symbols:
@@ -123,11 +90,43 @@ class FST:
             if new_pool.__len__() == 0:
                 return []
             state_pool = new_pool
-            # print(new_pool)
         if self.final_state in new_pool:
             return new_pool[self.final_state]
         else:
             return []
+
+
+def parse_arc(sequence, is_first):
+    words = sequence.split(' ')
+    words = [word.strip("(") for word in words if word.strip("(")]
+    words = [word.strip(")") for word in words if word.strip(")")]
+    if is_first and words.__len__() == 4:  # with start state but without prob
+        words.append(1)
+        return words
+    elif is_first and words.__len__() == 5:  # with start state and prob
+        return words
+    elif not is_first and words.__len__() == 3:  # without start state and prob
+        words.append(1)
+        return words
+    elif not is_first and words.__len__() == 4:  # without start state but with prob
+        return words
+    else:
+        print("Error: input line is illegal")
+
+
+def parse_line(line):
+    line = re.sub(" +", " ", line)
+    line = re.sub("\) \(", "\n", line)
+    arcs = line.split('\n')
+    transitions = []
+    info = parse_arc(arcs[0], True)  # parse first node (with start state)
+    start = info[0]
+    transitions.append((start, info[1], info[2], info[3], info[4]))
+    for arc in arcs[1:]:
+        info = parse_arc(arc, False)
+        transitions.append((start, info[0], info[1], info[2], info[3]))  # nodes in one line share one start state
+    return transitions
+
 
 def create_fst(fst_filename):
     f = open(fst_filename)
