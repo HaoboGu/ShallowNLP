@@ -1,0 +1,3 @@
+S1
+(S (S1 "fish" "VERB" 0.3) (S "fish" "NOUN" 0.7) (S "can" "VERB" 0.01) (S "can" "AUX" 0.99) (S "they" "PRO"))
+(S1 (S "mo" "VERB" 1) (S1 "chi" "VERB" 0.2) (S1 "yu" "NOUN") (S2 "fish" "NOUN"))

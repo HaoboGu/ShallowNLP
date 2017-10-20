@@ -159,8 +159,6 @@ if __name__ == "__main__":
         fst_filename = args[0]
         input_filename = args[1]
         fst = create_fst(fst_filename)
-        # for item in fst.transitions:
-        #     print(item)
         input_file = open(input_filename)
         input_line = input_file.readline()
         while input_line:
