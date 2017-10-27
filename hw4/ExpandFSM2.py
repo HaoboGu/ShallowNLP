@@ -3,7 +3,6 @@
 from optparse import OptionParser
 import re
 import queue
-import copy
 
 
 class FSA:
@@ -66,6 +65,92 @@ class FSA:
                 # print(print_seq[0])
             else:
                 print_seq.append('('+tran[0]+' ('+tran[1]+' '+tran[2]+'))\n')
+        f.writelines(self.final_state+'\n')
+        for item in print_seq:
+            f.writelines(item)
+
+
+class FST:
+    states = []
+    transitions = []  # [(start, end, input, output, probability)]
+
+    def __init__(self, start, final):
+        self.start_state = start
+        self.final_state = final
+
+    def add_transition(self, tran):
+        if tran not in self.transitions:
+            self.transitions.append(tran)
+            if tran[0] not in self.states:  # start state of this transition
+                self.states.append(tran[0])
+            if tran[1] not in self.states:
+                self.states.append(tran[1])  # end state of this transition
+
+    def move(self, state, state_data, input_symbol):
+        """
+        Move from current state to next state. Return a set of possible next states
+        :param state: current state
+        :param state_data: (current_string, current_prob)
+        :param input_symbol:
+        :return: next_states: [(next_state, (next_string, next_prob)), (), ...]
+        """
+        next_states = []
+        for item in self.transitions:  # [(start, end, input, output, probability)]
+            if item[0] == state and item[2] == input_symbol:  # if start state and input symbol of a transition match
+                # store next_state's information with tuple(next_state, (next_string, next_prob))
+                next_state = (item[1], (str(state_data[0]) + " " + str(item[3]), float(item[4]) * float(state_data[1])))
+                next_states.append(next_state)
+        return next_states
+
+
+    def add_states_to_dictionary(self, states, pool):
+        """
+        Transform states in tuple form and add them to dictionary pool. Eliminate multiple paths pointing to one node.
+        :param states: [(state, (string, prob)), (), ...]
+        :param pool: current state pool
+        :return: dictionary{state: (string, prob)}
+        """
+        for state in states:
+            if state[0] not in pool:
+                pool[state[0]] = state[1]
+            elif state[1][1] > pool[state[0]][1]:  # if current state's prob is greater than what is in the dictionary
+                pool[state[0]] = state[1]
+        return pool
+
+    def viterbi(self, input_line):
+        """
+        viterbi algorithm, decide whether input line is accepted by this fst
+        :param input_line:
+        :return: (output_string,  best_prob) if the input string is accepted;
+                 [] if the input is not accepted
+        """
+        input_line = input_line.strip('\n')
+        symbols = input_line.split(' ')
+        state_pool = {}  # {state:([string], prob)}
+        state_pool[self.start_state] = ("", 1)
+        for symbol in symbols:
+            new_pool = {}
+            for state in state_pool:
+                next_states = self.move(state, state_pool[state], symbol)
+                # add to new dictionary and eliminate useless path according to prob
+                new_pool = self.add_states_to_dictionary(next_states, new_pool)
+            if new_pool.__len__() == 0:
+                return []
+            state_pool = new_pool
+        if self.final_state in new_pool:
+            return new_pool[self.final_state]
+        else:
+            return []
+
+    def write_fst(self, output_filename):
+        f = open(output_filename, 'w')
+        print_seq = []
+        for tran in self.transitions:
+            if tran[0] == self.start_state:
+                print_seq.insert(0, '('+tran[0]+' ('+tran[1]+' '+tran[2]+' '+tran[3]+'))\n')
+                # print(print_seq[0])
+            else:
+                print_seq.append('('+tran[0]+' ('+tran[1]+' '+tran[2]+' '+tran[3]+'))\n')
         f.writelines(self.final_state+'\n')
         for item in print_seq:
             f.writelines(item)
@@ -139,25 +224,30 @@ def create_fsa(fsa_filename):
 
 def convert(filename_lexicon, filename_morph):
     """
-    Combine lexicon entries and morphological rules into expanded FSM in carmel form. 
-    In expanded FSM, each path corresponds to an entry in the lexicon. 
+    Combine lexicon entries and morphological rules into expanded FST in carmel form.
+    In expanded FSM, each path corresponds to an entry in the lexicon.
     :param filename_lexicon: lexicon entries
     :param filename_morph: morphological rules
-    :return: expanded FSM for input lexicon entries
+    :return: expanded FST for input lexicon entries
     """
     lexicons = read_lexicons(filename_lexicon)
     morph_rules = create_fsa(filename_morph)
-    output_fsa = copy.deepcopy(morph_rules)
-    output_fsa.prepare_expand()
+    # then convert FSA to FST
+    output_fst = FST(morph_rules.start_state, morph_rules.final_state)
     for word, ty in lexicons:
-        for tran in output_fsa.ori_transitions:
+        for tran in morph_rules.transitions:
             if ty == tran[2]:
-                output_fsa.add_transition((ty+"_"+word, tran[1], "*e*"))
-                output_fsa.add_transition((tran[0], ty+"_"+word[0], word[0]))
-        for index in range(1, len(word)):
-            output_fsa.add_transition((ty+"_"+word[:index], ty+"_"+word[:index + 1], word[index]))
-
-    return output_fsa
+                # "-" is added to separate two labels in next steps
+                output_fst.add_transition((ty+"_"+word, tran[1], "*e*", word+'/'+ty))  # state(word) -> state(form_end)
+                output_fst.add_transition((tran[0], ty+"_"+word[0], word[0], "*e*"))  # state(form_start) -> state(word[0])
+        for index in range(1, len(word)-1):
+            output_fst.add_transition((ty+"_"+word[:index], ty+"_"+word[:index + 1], word[index], "*e*"))
+        index = len(word) - 1
+        output_fst.add_transition((ty + "_" + word[:index], ty + "_" + word[:index + 1], word[index], "*e*"))
+    for tran in morph_rules.transitions:
+        if tran[2] == "*e*":
+            output_fst.add_transition((tran[0], tran[1], tran[2], "*e*"))
+    return output_fst
 
 
 if __name__ == "__main__":
@@ -171,7 +261,6 @@ if __name__ == "__main__":
         output_filename = args[2]
         # lexicon_filename = "examples/lexicon_ex"
         # morph_rules_filename = "examples/morph_rules_ex"
-        # output_filename = "examples/output_fsm"
+        # output_filename = "output_fst"
         output_fsm = convert(lexicon_filename, morph_rules_filename)
-        output_fsm.write_fsa(output_filename)
-
+        output_fsm.write_fst(output_filename)
