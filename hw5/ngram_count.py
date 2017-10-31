@@ -18,21 +18,15 @@ if __name__ == "__main__":
         else:
             training_data = args[0]
             ngram_count_file = args[1]
-        unigram_dict = {}
-        bigram_dict = {}
-        trigram_dict = {}
+        unigram_dict, bigram_dict, trigram_dict = {}, {}, {}
         input_file = open(training_data)
         input_line = input_file.readline().strip('\n')
         while input_line:
-
             input_line = "<s> " + input_line + " </s>"
             input_line = re.sub(" +", " ", input_line)
-            # print(input_line)
             words = input_line.split(" ")
-            # print(words, words.__len__())
             # unigrams
             for unigram in words:
-
                 if unigram in unigram_dict:
                     unigram_dict[unigram] += 1
                 else:
