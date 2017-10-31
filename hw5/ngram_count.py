@@ -19,14 +19,17 @@ if __name__ == "__main__":
             training_data = args[0]
             ngram_count_file = args[1]
         unigram_dict, bigram_dict, trigram_dict = {}, {}, {}
+        # n_words, n_lines = 0, 0
         input_file = open(training_data)
         input_line = input_file.readline().strip('\n')
         while input_line:
+            # n_lines+=1
             input_line = "<s> " + input_line + " </s>"
             input_line = re.sub(" +", " ", input_line)
             words = input_line.split(" ")
             # unigrams
             for unigram in words:
+                # n_words += 1
                 if unigram in unigram_dict:
                     unigram_dict[unigram] += 1
                 else:
@@ -56,3 +59,4 @@ if __name__ == "__main__":
         for key, value in sorted(trigram_dict.items(), key=itemgetter(1), reverse=True):
             output_file.write(str(value) + '\t' + str(key) + '\n')
         output_file.close()
+        print(n_words, n_lines)
