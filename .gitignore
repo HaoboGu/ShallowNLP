@@ -103,4 +103,5 @@ ENV/
 # idea folder
 .idea/
 */.idea/
+*/*/.idea/
 *.xml
