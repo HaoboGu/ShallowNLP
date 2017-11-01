@@ -29,6 +29,7 @@ def process_unigrams(unigram_dict, n_tokens, output_filename):
         p = value/n_tokens[0]
         log_p = log10(p)
         output_file.write(str(value) + ' ' + str(p) + ' ' + str(log_p) + ' ' + key + '\n')
+    output_file.write('\n')
     output_file.close()
 
 
@@ -41,6 +42,7 @@ def process_bigrams(bigram_dict, unigram_dict, output_filename):
         p = value / unigram_dict[pre_word]
         log_p = log10(p)
         output_file.write(str(value) + ' ' + str(p) + ' ' + str(log_p) + ' ' + key + '\n')
+    output_file.write('\n')
     output_file.close()
 
 
@@ -54,6 +56,8 @@ def process_trigrams(trigram_dict, bigram_dict, output_filename):
         p = value / bigram_dict[bigram]
         log_p = log10(p)
         output_file.write(str(value) + ' ' + str(p) + ' ' + str(log_p) + ' ' + key + '\n')
+    output_file.write('\n')
+    output_file.write('\\end\\')
     output_file.close()
 
 
@@ -65,8 +69,8 @@ if __name__ == "__main__":
     else:
         use_local_file = 1
         if use_local_file:
-            lm_file = "lm"
-            ngram_count_file = 'examples/ngram_count_ex'
+            lm_file = "wsj_sec0_19.lm"
+            ngram_count_file = 'wsj_sec0_19.ngram_count'
         else:
             training_data = args[0]
             ngram_count_file = args[1]
@@ -88,7 +92,4 @@ if __name__ == "__main__":
         process_unigrams(unigram_dict, n_tokens, lm_file)
         process_bigrams(bigram_dict, unigram_dict, lm_file)
         process_trigrams(trigram_dict, bigram_dict, lm_file)
-
-
-
 

@@ -4,17 +4,16 @@ from optparse import OptionParser
 import re
 from operator import itemgetter
 
-
 if __name__ == "__main__":
     parser = OptionParser(__doc__)
     options, args = parser.parse_args()
     if len(args) == 1:
         print("Error: please specify input file")
     else:
-        use_local_file = 0
+        use_local_file = 1
         if use_local_file:
-            training_data = "examples/training_data_ex"
-            ngram_count_file = 'ngram_count_ex'
+            training_data = "examples/wsj_sec0_19.word"
+            ngram_count_file = 'wsj_sec0_19.ngram_count'
         else:
             training_data = args[0]
             ngram_count_file = args[1]
@@ -59,4 +58,3 @@ if __name__ == "__main__":
         for key, value in sorted(trigram_dict.items(), key=itemgetter(1), reverse=True):
             output_file.write(str(value) + '\t' + str(key) + '\n')
         output_file.close()
-        print(n_words, n_lines)
