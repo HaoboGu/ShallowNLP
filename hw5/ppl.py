@@ -1,7 +1,6 @@
 # !/usr/bin/python
 
 from optparse import OptionParser
-from operator import itemgetter
 from math import log10
 
 
@@ -11,27 +10,21 @@ def read_lm(lm_filename):
     lm.readline()
     lm.readline()
     lm.readline()
-    # unigrams, bigrams, trigrams = {}, {}, {}
     ngrams = {}
     while line:
         line = line.strip('\n')
         seq = line.split(' ')
         if seq.__len__() == 4:
-            # unigrams[seq[3]] = float(seq[1])
             key = seq[3]
             ngrams[key] = float(seq[1])
         elif seq.__len__() == 5:
             key = seq[3] + ' ' + seq[4]
-            # bigrams[key] = float(seq[1])
             ngrams[key] = float(seq[1])
         elif seq.__len__() == 6:
             key = seq[3] + ' ' + seq[4] + ' ' + seq[5]
-            # trigrams[key] = float(seq[1])
             ngrams[key] = float(seq[1])
-    # for i in range(0, 3):
         line = lm.readline()
     lm.close()
-    # return unigrams, bigrams, trigrams
     return ngrams
 
 
@@ -68,18 +61,17 @@ def write_corpus_data(output_file, sent_num, total_word_num, total_oov_num, tota
     ave_p = total_lg_sum / cnt
     ppl = 10 ** (-total_lg_sum / cnt)
     output_file.write('lgprob=' + str(total_lg_sum) + ' ave_lgprob=' + str(ave_p) + ' ppl=' + str(ppl) + '\n')
-    print(ppl)
+
 
 if __name__ == "__main__":
     parser = OptionParser(__doc__)
     options, args = parser.parse_args()
-    if len(args) == 1:
-        print("Error: please specify input file")
+    if len(args) != 6:
+        print("Error: number of args incorrect")
     else:
-        use_local_file = 1
+        use_local_file = 0
         if use_local_file:
             lm_file = "wsj_sec0_19.lm"
-
             l1 = 1
             l2 = 0.0
             l3 = 0.0
@@ -87,13 +79,12 @@ if __name__ == "__main__":
             output_filename = "perplexity"
         else:
             lm_file = args[0]
-            l1 = args[1]
-            l2 = args[2]
-            l3 = args[3]
+            l1 = float(args[1])
+            l2 = float(args[2])
+            l3 = float(args[3])
             test_data_file = args[4]
             output_filename = args[5]
-        # unigrams, bigrams, trigrams = read_lm(lm_file)  # get probabilities
-        ngrams = read_lm(lm_file)
+        ngrams = read_lm(lm_file)  # get ngram dictionary
         input_file = open(test_data_file)
         line = input_file.readline().strip('\n')
         output_file = open(output_filename, 'w')
@@ -142,16 +133,4 @@ if __name__ == "__main__":
         total_lg_sum = sum(s_lg_sum)
         write_corpus_data(output_file, sent_num, total_word_num, total_oov_num, total_lg_sum)
         output_file.close()
-
-
-
-
-
-ppls = [399.74929370996205,
-        378.61850477227665,
-        237.25559718102593,
-        213.70274473410763,
-        212.33510544280088,
-        236.5229749395932,
-        998.6722222286437]
 

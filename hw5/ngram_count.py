@@ -7,10 +7,10 @@ from operator import itemgetter
 if __name__ == "__main__":
     parser = OptionParser(__doc__)
     options, args = parser.parse_args()
-    if len(args) == 1:
-        print("Error: please specify input file")
+    if len(args) != 2:
+        print("Error: number of args incorrect")
     else:
-        use_local_file = 1
+        use_local_file = 0
         if use_local_file:
             training_data = "examples/wsj_sec0_19.word"
             ngram_count_file = 'wsj_sec0_19.ngram_count'
@@ -18,17 +18,14 @@ if __name__ == "__main__":
             training_data = args[0]
             ngram_count_file = args[1]
         unigram_dict, bigram_dict, trigram_dict = {}, {}, {}
-        # n_words, n_lines = 0, 0
         input_file = open(training_data)
         input_line = input_file.readline().strip('\n')
         while input_line:
-            # n_lines+=1
             input_line = "<s> " + input_line + " </s>"
             input_line = re.sub(" +", " ", input_line)
             words = input_line.split(" ")
             # unigrams
             for unigram in words:
-                # n_words += 1
                 if unigram in unigram_dict:
                     unigram_dict[unigram] += 1
                 else:

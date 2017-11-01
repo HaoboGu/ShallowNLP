@@ -64,16 +64,16 @@ def process_trigrams(trigram_dict, bigram_dict, output_filename):
 if __name__ == "__main__":
     parser = OptionParser(__doc__)
     options, args = parser.parse_args()
-    if len(args) == 1:
-        print("Error: please specify input file")
+    if len(args) != 2:
+        print("Error: number of args incorrect")
     else:
-        use_local_file = 1
+        use_local_file = 0
         if use_local_file:
             lm_file = "wsj_sec0_19.lm"
             ngram_count_file = 'wsj_sec0_19.ngram_count'
         else:
-            training_data = args[0]
-            ngram_count_file = args[1]
+            ngram_count_file = args[0]
+            lm_file = args[1]
         unigram_dict, bigram_dict, trigram_dict = {}, {}, {}
         input_file = open(ngram_count_file)
         input_line = input_file.readline().strip('\n')
