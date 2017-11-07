@@ -107,3 +107,4 @@ ENV/
 *.xml
 *.lm
 *.ngram_count
+*.hmm
