@@ -89,7 +89,7 @@ if __name__ == "__main__":
             input_line = input_file.readline().strip("\n")
         input_file.close()
         n_types, n_tokens = write_data_chunk(unigram_dict, bigram_dict, trigram_dict, lm_file)
-        process_unigrams(unigram_dict, n_tokens, lm_file)
+        process_unigrams(unigram_dict, n_tokens, lm_file)  # n_tokens=(token of unigrams, token of bi, token of tri)
         process_bigrams(bigram_dict, unigram_dict, lm_file)
         process_trigrams(trigram_dict, bigram_dict, lm_file)
 
