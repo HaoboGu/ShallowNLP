@@ -14,9 +14,8 @@ def read_ngram(use_local_file):
     :return: ngram dictionaries, where the key is tuple of (word,pos)
     """
     unigram_dict, bigram_dict, trigram_dict = {}, {}, {}
-    input_file = open('examples/wsj_sec0.word_pos')
-
     if use_local_file:
+        input_file = open('examples/wsj_sec0.word_pos')
         input_line = input_file.readline().strip('\n')
     else:
         input_line = sys.stdin.readline().strip('\n')
