@@ -224,7 +224,7 @@ def write_emission(out_file, emission_dict):
 if __name__ == "__main__":
     parser = OptionParser(__doc__)
     options, args = parser.parse_args()
-    use_local_file = 1
+    use_local_file = 0
     if use_local_file:
         out_hmm = "output.hmm"
     else:

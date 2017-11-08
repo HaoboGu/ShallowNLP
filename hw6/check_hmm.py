@@ -178,9 +178,9 @@ def check_hmm(hmm_filename):
 if __name__ == "__main__":
     parser = OptionParser(__doc__)
     options, args = parser.parse_args()
-    use_local_file = 1
+    use_local_file = 0
     if use_local_file:
-        hmm_file = "examples/hmm_ex2"
+        hmm_file = "q2.hmm"
     else:
         hmm_file = args[0]
 

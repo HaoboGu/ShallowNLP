@@ -6,7 +6,6 @@ from operator import itemgetter
 import sys
 from math import log10
 
-
 def read_ngram(use_local_file):
     """
     Read , process and return ngrams
@@ -135,7 +134,7 @@ def cal_emission_prob(unigrams, unknown, pos_unigrams):  # calculate emission pr
     for item in state_outsymbol:  # item: pos
         dic = state_outsymbol[item]
         s_count = sum(dic.values())
-        if item in unknown:
+        if item in unknown:  # for tag which doesn't appears in unknown_prob_file, assume that p(unk|tag)=0
             smooth = (1 - unknown[item])
         else:
             smooth = 1
@@ -151,28 +150,62 @@ def cal_emission_prob(unigrams, unknown, pos_unigrams):  # calculate emission pr
     return emission
 
 
-def cal_transition_prob(bigram_dict, unigram_dict):
+def count(ngram_dict, key):
     """
-    Calculate bigram transition probability
+    Get count number from ngrams, if the key is not in ngram_dict, returns 0
+    :param ngram_dict:
+    :param key:
+    :return:
+    """
+    if key in ngram_dict:
+        return ngram_dict[key]
+    else:
+        return 0
+
+
+def cal_transition_prob(pos_unigrams, pos_bigrams, pos_trigrams, l1, l2, l3):
+    """
+    Calculate trigram transition probability
     :param bigram_dict: Input bigram dictionary{(word, pos):count}
     :param unigram_dict: Input unigram dictionary{(word, pos):count}
     :return: Transition probability dictionary {(from_state, to_state):probability}
     """
-    # print(unigrams)
-    bigram_dict = convert_ngram(bigram_dict)  # convert {(word,pos):count} to {pos:value}
-    unigram_dict = convert_ngram(unigram_dict)
+    possible_trigrams = []
+    for item1 in pos_unigrams:
+        for item2 in pos_unigrams:
+            for item3 in pos_unigrams:
+                possible_trigrams.append(item1 + ' ' + item2 + ' ' + item3)
+    s_unigram = sum(pos_unigrams.values())
+    t = pos_unigrams.__len__()-2
     transitions = {}
-    log_transitions = {}
-    for key, value in sorted(bigram_dict.items(), key=itemgetter(1), reverse=True):
-        # for bigrams, p(w1|w0) = p(w0,w1)/p(w0)
-        pre_state = key.split(' ')[0]
-        cur_state = key.split(' ')[1]
-        # unigram_key = (key[0].split(' ')[0], pre_state)
-        p = value / unigram_dict[pre_state]
-        log_p = log10(p)
-        transitions[(pre_state, cur_state)] = p
-        log_transitions[(pre_state, cur_state)] = log_p
-    return transitions, log_transitions
+    for trigram in possible_trigrams:
+
+        pre_bigram = trigram.split(' ')[0] + ' ' + trigram.split(' ')[1]
+        post_bigram = trigram.split(' ')[1] + ' ' + trigram.split(' ')[2]
+        cur_unigram = trigram.split(' ')[2]  # trigram = t1_t2_t3, t1 is the first pos, t3 is the current pos
+        mid_unigram = trigram.split(' ')[1]
+        p1 = count(pos_unigrams, cur_unigram) / s_unigram
+        if mid_unigram == "EOS":
+            if cur_unigram == "EOS":
+                p2 = 1
+                p3 = 1
+            else:
+                p2 = 0
+                p3 = 0
+        else:  # pos_mid is not EOS
+            p2 = count(pos_bigrams, post_bigram) / count(pos_unigrams, mid_unigram)
+            if cur_unigram == "BOS":  # current pos is BOS, p3 = 0
+                p3 = 0
+            elif count(pos_bigrams, pre_bigram) == 0:  # previous bigram is not in training file
+                p3 = 1/(t+1)
+            else:
+                p3 = count(pos_trigrams, trigram) / count(pos_bigrams, pre_bigram)
+        #         print(p3)
+        # print(trigram, p1, p2, p3)
+        p = l1 * p1 + l2 * p2 + l3 * p3
+        transitions[trigram] = p
+
+    return transitions
 
 
 def write_header(out_file, state_num, symbol_num, init_line, trans_line, emiss_line):
@@ -224,8 +257,9 @@ def write_trans(out_file, tran_dict):
     f = open(out_file, "a")
     f.write('\\transition\n')
     for item in tran_dict:
-        word = item[0].replace('<*s*>', '</s>')
-        f.write(word + '\t' + item[1] + '\t' + str(tran_dict[item]) + '\n')
+        seq = item.split(' ')
+
+        f.write(seq[0]+'_'+seq[1] + '\t' + seq[1]+'_'+seq[2] + '\t' + str(tran_dict[item]) + '\n')
     f.write('\n')
     f.write('\n')
     f.close()
@@ -265,12 +299,12 @@ def generate_states(unigrams):
 if __name__ == "__main__":
     parser = OptionParser(__doc__)
     options, args = parser.parse_args()
-    use_local_file = 1
+    use_local_file = 0
     if use_local_file:
-        out_hmm = "output.hmm"
+        out_hmm = "q2.hmm"
         l1 = 0.1
-        l2 = 0.5
-        l3 = 0.4
+        l2 = 0.1
+        l3 = 0.8
         unknown_filename = "examples/unk_prob_sec22"
     else:
         out_hmm = args[0]
@@ -287,16 +321,9 @@ if __name__ == "__main__":
     states = generate_states(pos_unigrams)
     pi = cal_initial_prob(states)
     emission = cal_emission_prob(unigrams, unknown, pos_unigrams)  # emission is a dictionary, {(word, pos):prob}
-    print(emission)
-    # for s in states:
-    sm = 0
-    for item in emission:
-        if item[1] == "NNS_BOS":
-            sm += emission[item]
-            print(item)
-    print(sm)
+    # transition, log_transition = cal_transition_prob(bigrams, unigrams, l1, l2, l3)
 
-
+    transition = cal_transition_prob(pos_unigrams, pos_bigrams, pos_trigrams, l1, l2, l3)
 
     words = []
     pos = []
@@ -305,11 +332,12 @@ if __name__ == "__main__":
             words.append(word_pos[0])
         if word_pos[1] not in pos:
             pos.append(word_pos[1])
-
-
-    transition, log_transition = cal_transition_prob(bigrams, unigrams)
-    state_num = pos.__len__()  # State contains BOS and EOS
+    words.append('<unk>')
+    #
+    #
+    state_num = states.__len__()  # State contains BOS and EOS
     symbol_num = words.__len__()  # Symbol contains <s> and </s>
+
     init_line = pi.__len__()  # Only non-zero initial probability
     trans_line = transition.__len__()  # Contains transitions from BOS and to EOS
     emiss_line = emission.__len__()  # Contains emissions from EOS but BOS
