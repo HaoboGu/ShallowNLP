@@ -108,3 +108,4 @@ ENV/
 *.lm
 *.ngram_count
 *.hmm
+*.warning
