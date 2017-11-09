@@ -131,20 +131,19 @@ def cal_transition_prob(bigram_dict, unigram_dict):
     :param unigram_dict: Input unigram dictionary{(word, pos):count}
     :return: Transition probability dictionary {(from_state, to_state):probability}
     """
-    # print(unigrams)
     bigram_dict = convert_ngram(bigram_dict)  # convert {(word,pos):count} to {pos:value}
     unigram_dict = convert_ngram(unigram_dict)
     transitions = {}
     log_transitions = {}
     for key, value in sorted(bigram_dict.items(), key=itemgetter(1), reverse=True):
-        # for bigrams, p(w1|w0) = p(w0,w1)/p(w0)
         pre_state = key.split(' ')[0]
         cur_state = key.split(' ')[1]
-        # unigram_key = (key[0].split(' ')[0], pre_state)
         p = value / unigram_dict[pre_state]
         log_p = log10(p)
         transitions[(pre_state, cur_state)] = p
         log_transitions[(pre_state, cur_state)] = log_p
+    transitions[("EOS", "EOS")] = 1
+    log_transitions[("EOS", "EOS")] = log10(1)
     return transitions, log_transitions
 
 
@@ -224,7 +223,7 @@ def write_emission(out_file, emission_dict):
 if __name__ == "__main__":
     parser = OptionParser(__doc__)
     options, args = parser.parse_args()
-    use_local_file = 0
+    use_local_file = 1
     if use_local_file:
         out_hmm = "output.hmm"
     else:
