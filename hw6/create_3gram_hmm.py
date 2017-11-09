@@ -333,8 +333,6 @@ if __name__ == "__main__":
         if word_pos[1] not in pos:
             pos.append(word_pos[1])
     words.append('<unk>')
-    #
-    #
     state_num = states.__len__()  # State contains BOS and EOS
     symbol_num = words.__len__()  # Symbol contains <s> and </s>
 
