@@ -109,3 +109,4 @@ ENV/
 *.ngram_count
 *.hmm
 *.warning
+*/examples/
