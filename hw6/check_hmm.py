@@ -3,6 +3,7 @@
 from optparse import OptionParser
 import re
 
+
 def check_init(hmm_file, init_num):
     """
     Check initial probabilities
@@ -11,6 +12,7 @@ def check_init(hmm_file, init_num):
     :return:
     """
     return False
+
 
 def read_init_probs(hmm_file):
     """
@@ -21,17 +23,14 @@ def read_init_probs(hmm_file):
     init_prob = {}
     line = hmm_file.readline().strip('\n')
     while line:
-        line = line.replace('\t', ' ')
-        line = re.sub(' +', ' ', line)
-        seq = line.strip(' ').split(' ')
-        if seq.__len__() == 2:
-            init_prob[seq[0]] = float(seq[1])
-            line = hmm_file.readline().strip('\n')
-        else:
+        line = re.sub('\s+', ' ', line)
+        if line == ' ':
             break
-
-
+        seq = line.strip(' ').split(' ')
+        init_prob[seq[0]] = float(seq[1])
+        line = hmm_file.readline().strip('\n')
     return init_prob
+
 
 def read_transitions(hmm_file):
     """
@@ -42,15 +41,15 @@ def read_transitions(hmm_file):
     transitions = {}
     line = hmm_file.readline().strip('\n')
     while line:
-        line = line.replace('\t', ' ')
-        line = re.sub(' +', ' ', line)
-        seq = line.strip(' ').split(' ')
-        if seq.__len__() == 3:
-            transitions[(seq[0], seq[1])] = float(seq[2])
-            line = hmm_file.readline()
-        else:
+        line = re.sub('\s+', ' ', line)
+        if line == ' ':
             break
+        seq = line.strip(' ').split(' ')
+        transitions[(seq[0], seq[1])] = float(seq[2])
+        line = hmm_file.readline()
+
     return transitions
+
 
 def read_emissions(hmm_file):
     """
@@ -61,14 +60,12 @@ def read_emissions(hmm_file):
     emissions = {}
     line = hmm_file.readline().strip('\n')
     while line:
-        line = line.replace('\t', ' ')
-        line = re.sub(' +', ' ', line)
-        seq = line.strip(' ').split(' ')
-        if seq.__len__() == 3:
-            emissions[(seq[0], seq[1])] = float(seq[2])
-            line = hmm_file.readline()
-        else:
+        line = re.sub('\s+', ' ', line)
+        if line == ' ':
             break
+        seq = line.strip(' ').split(' ')
+        emissions[(seq[0], seq[1])] = float(seq[2])
+        line = hmm_file.readline()
     return emissions
 
 
@@ -97,11 +94,12 @@ def check_hmm(hmm_filename):
     emiss_num = emiss_num_line.split('=')[1]
     line = f.readline()
     while line:
-        if line == '\\init\n':
+        line = re.sub('\s+', ' ', line)
+        if line == '\\init ':
             pi = read_init_probs(f)
-        elif line == '\\transition\n':
+        elif line == '\\transition ':
             transitions = read_transitions(f)
-        elif line == '\\emission\n':
+        elif line == '\\emission ':
             emissions = read_emissions(f)
         line = f.readline()
             # print("other kinds of line")
@@ -151,7 +149,7 @@ def check_hmm(hmm_filename):
     s_pi = 0
     for item in pi:
         s_pi += pi[item]
-    if abs(s_pi - 1) > 0.000000001:
+    if abs(s_pi - 1) > 0.00001:
         print('warning: the init_prob_sum is ' + str(s_pi))
 
     for state in states:
@@ -159,7 +157,7 @@ def check_hmm(hmm_filename):
         for item in transitions:
             if item[0] == state:
                 s_trans += transitions[item]
-        if abs(s_trans - 1) > 0.000000001:  # write in readme
+        if abs(s_trans - 1) > 0.00001:
             print('warning: the trans_prob_sum for state ' + str(state) + ' is ' + str(s_trans))
 
     for state in states:
@@ -167,7 +165,7 @@ def check_hmm(hmm_filename):
         for item in emissions:
             if item[0] == state:
                 s_emiss += emissions[item]
-        if abs(s_emiss - 1) > 0.000000001:  # write in readme
+        if abs(s_emiss - 1) > 0.00001:
             print('warning: the emiss_prob_sum for state ' + str(state) + ' is ' + str(s_emiss))
     #
     # print(pi)
