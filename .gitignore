@@ -100,7 +100,7 @@ ENV/
 # mypy
 .mypy_cache/
 
-# idea folder
+# files to ignore in hw
 .idea/
 */.idea/
 */*/.idea/
@@ -110,3 +110,4 @@ ENV/
 *.hmm
 *.warning
 */examples/
+*.tar.gz
