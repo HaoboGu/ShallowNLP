@@ -24,7 +24,7 @@ def convert():
         for i in range(0, words.__len__()):
             word_pos = words[i] + '/' + states[i+1].split('_')[1]
             out_str = out_str + word_pos + ' '
-        print(out_str.strip(' ') + '\n')
+        print(out_str.strip(' '))
         if use_local_file == 1:
             line = f.readline().strip('\n')
         else:
