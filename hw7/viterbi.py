@@ -2,7 +2,6 @@
 
 from optparse import OptionParser
 import re
-import time
 from math import log10
 
 
@@ -173,7 +172,6 @@ def viterbi(hmm, line):
 
 
 if __name__ == "__main__":
-    start = time.time()
     parser = OptionParser(__doc__)
     options, args = parser.parse_args()
     use_local_file = 0
@@ -202,7 +200,5 @@ if __name__ == "__main__":
             out_str = out_str + ' ' + str(re[1]) + '\n'
             f.write(out_str)
     f.close()
-    end = time.time()
-    print(end-start)
 
 
