@@ -178,9 +178,9 @@ if __name__ == "__main__":
     options, args = parser.parse_args()
     use_local_file = 1
     if use_local_file:
-        input_filename = "examples/hmm1"
+        input_filename = "examples/hmm5"
         test_filename = "examples/test.word"
-        output_filename = "examples/sys1"
+        output_filename = "examples/sys5"
     else:
         input_filename = args[0]
         test_filename = args[1]
