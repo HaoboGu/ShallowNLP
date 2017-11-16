@@ -36,11 +36,11 @@ if __name__ == "__main__":
     start = time.time()
     parser = OptionParser(__doc__)
     options, args = parser.parse_args()
-    use_local_file = 1
+    use_local_file = 0
     if use_local_file:
         output_filename = "examples/sys5_res"
     else:
-        output_filename = args[2]
+        output_filename = args[0]
     read_result(use_local_file, output_filename)
 
     end = time.time()

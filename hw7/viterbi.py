@@ -176,7 +176,7 @@ if __name__ == "__main__":
     start = time.time()
     parser = OptionParser(__doc__)
     options, args = parser.parse_args()
-    use_local_file = 1
+    use_local_file = 0
     if use_local_file:
         input_filename = "examples/hmm5"
         test_filename = "examples/test.word"
