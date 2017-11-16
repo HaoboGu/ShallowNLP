@@ -180,7 +180,7 @@ if __name__ == "__main__":
     if use_local_file:
         input_filename = "examples/hmm1"
         test_filename = "examples/test.word"
-        output_filename = "sys"
+        output_filename = "examples/sys1"
     else:
         input_filename = args[0]
         test_filename = args[1]
