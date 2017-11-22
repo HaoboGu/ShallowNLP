@@ -74,7 +74,7 @@ if __name__ == "__main__":
         num_args = len(args)
         train_vector_filename = args[0]
         test_vector_filename = args[1]
-        ratio = args[2]
+        ratio = float(args[2])
         dirs = []
         for i in range(3, num_args):
             dirs.append(args[i])
