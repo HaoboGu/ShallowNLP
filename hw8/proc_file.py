@@ -7,7 +7,7 @@ from operator import itemgetter
 
 def write_result(input_filename, target_label, output_filename, word_dictionary):
     out_f = open(output_filename, 'w')
-    out_f.write("input_ex" + ' ' + target_label)
+    out_f.write(input_filename + ' ' + target_label)
 
     for item in sorted(word_dictionary.items(), key=itemgetter(0)):
         out_f.write(' ' + item[0] + ' ' + str(item[1]))
@@ -41,7 +41,7 @@ def proc_file(input_filename):
 if __name__ == "__main__":
     parser = OptionParser(__doc__)
     options, args = parser.parse_args()
-    use_local_file = 1
+    use_local_file = 0
     if use_local_file:
         input_filename = "examples/20_newsgroups/talk.politics.guns/55094"
         target_label = "c1"

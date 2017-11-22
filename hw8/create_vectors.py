@@ -61,7 +61,7 @@ def create_vector(dirs, ratio, train_vector_file, test_vector_file):
 if __name__ == "__main__":
     parser = OptionParser(__doc__)
     options, args = parser.parse_args()
-    use_local_file = 1
+    use_local_file = 0
     if use_local_file:
         train_vector_filename = "train.vectors.txt"
         test_vector_filename = "test.vectors.txt"
