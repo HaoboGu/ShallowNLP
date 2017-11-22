@@ -40,8 +40,8 @@ def write_result(input_filename, target_label, output_filename, word_dictionary)
 
 
 def create_vector(dirs, ratio, train_vector_file, test_vector_file):
-    os.remove(train_vector_file)
-    os.remove(test_vector_file)
+    # os.remove(train_vector_file)
+    # os.remove(test_vector_file)
     for sub_dir in dirs:
         label = os.path.basename(sub_dir)
         file_list = sorted(os.listdir(sub_dir))  # get all files in this sub-directory
@@ -79,6 +79,4 @@ if __name__ == "__main__":
         for i in range(3, num_args):
             dirs.append(args[i])
     create_vector(dirs, ratio, train_vector_filename, test_vector_filename)
-
-
 
