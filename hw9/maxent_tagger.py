@@ -243,7 +243,7 @@ if __name__ == "__main__":
     test_command = ['mallet', 'classify-file', '--input', test_file_path, '--output', 'test_result',
                     '--classifier', 'me-model']
 
-    o = subprocess.Popen(import_command, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+    o = subprocess.run(import_command, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
     print(o.stdout)
 
     # TODO: 1. write final_test.vectors.txt and run mallet commands 
