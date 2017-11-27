@@ -75,7 +75,7 @@ def set_features(i, wp_pairs, feature_count):
     return word_feat_dict
 
 
-def read_train(train_filename):
+def read_data(train_filename):
     f = open(train_filename)
     line = f.readline().strip('\n')
     features = []  # (word, word's fetures) pair
@@ -100,6 +100,14 @@ def read_train(train_filename):
     f.close()
     return word_count, feature_count, features
 
+
+def read_test_data(test_filename, feature_count):
+    """
+    Read test data, but we only keep the non-rare features obtained from training data.
+    :param test_filename:
+    :param feature_count:
+    :return:
+    """
 
 def proc_rare_word(word_count, feature_count, features, rare_thres):
     new_features = []
@@ -196,7 +204,7 @@ def write_vectors(word_features, output_dir, filename):
 if __name__ == "__main__":
     parser = OptionParser(__doc__)
     options, args = parser.parse_args()
-    use_local_file = 1
+    use_local_file = 0
     if use_local_file:
         train_filename = "examples/wsj_sec0.word_pos"
         test_filename = "test.word_pos"
@@ -211,17 +219,33 @@ if __name__ == "__main__":
         output_dir = args[4]
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
-    word_count, feature_count, features = read_train(train_filename)
+    # read and process training data
+    word_count, feature_count, features = read_data(train_filename)
     write_train_voc(word_count, output_dir, "train_voc")
     features = proc_rare_word(word_count, feature_count, features, rare_thres)
     write_feats(feature_count, output_dir, "init_feats")
-
     features, new_feature_count = remove_rare_features(features, feature_count, feat_thres)
     write_feats(new_feature_count, output_dir, "kept_feats")
     write_vectors(features, output_dir, "final_train.vectors.txt")
+
+    # read and process testing data
+    test_word_count, test_feature_count, test_features = read_data(test_filename)
+    test_features = proc_rare_word(test_word_count, test_feature_count, test_features, rare_thres)
+    test_features, test_new_feature_count = remove_rare_features(test_features, test_feature_count, feat_thres)
+    write_vectors(test_features, output_dir, "final_test.vectors.txt")
+
+    train_file_path = os.path.join(output_dir, "final_train.vectors.txt")
+    train_output_path = os.path.join(output_dir, "final_train.vectors")
+    import_command = ['mallet', 'import-file', '--input', train_file_path, '--output', train_output_path]
+    train_classifier_command = ['mallet', 'train-classifier', '--input', train_output_path,
+                                '--output-classifier', 'me-model', '--trainer', 'MaxEnt']
+    test_file_path = os.path.join(output_dir, "final_test.vectors.txt")
+    test_command = ['mallet', 'classify-file', '--input', test_file_path, '--output', 'test_result',
+                    '--classifier', 'me-model']
+
     # TODO: 1. write final_test.vectors.txt and run mallet commands 
     # 2. comma in different files
-    # 3. confirm containXX number 
+    # 3. confirm containXX number
     # 4. confirm the order of features
     # 5. confirm the representation of BOS
     
