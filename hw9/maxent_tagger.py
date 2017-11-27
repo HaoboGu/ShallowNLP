@@ -245,7 +245,10 @@ if __name__ == "__main__":
 
     o = subprocess.call(import_command)
     o = subprocess.call(train_classifier_command)
-    o = subprocess.call(test_command)
+    print("************* start test stage ********************")
+    o = subprocess.Popen(test_command, stdout=subprocess.PIPE)
+    outs, errs = o.communicate()
+    print(outs)
     # TODO: 1. write final_test.vectors.txt and run mallet commands 
     # 2. comma in different files
     # 3. confirm containXX number
