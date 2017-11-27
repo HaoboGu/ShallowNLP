@@ -4,7 +4,7 @@ from optparse import OptionParser
 import re
 from operator import itemgetter
 import os
-
+import subprocess
 
 def add_count2dictionary(key, dict):
     if key in dict:
@@ -242,6 +242,9 @@ if __name__ == "__main__":
     test_file_path = os.path.join(output_dir, "final_test.vectors.txt")
     test_command = ['mallet', 'classify-file', '--input', test_file_path, '--output', 'test_result',
                     '--classifier', 'me-model']
+
+    o = subprocess.Popen(import_command, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+    print(o.stdout)
 
     # TODO: 1. write final_test.vectors.txt and run mallet commands 
     # 2. comma in different files
