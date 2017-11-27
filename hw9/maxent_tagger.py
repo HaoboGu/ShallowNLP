@@ -243,9 +243,9 @@ if __name__ == "__main__":
     test_command = ['mallet', 'classify-file', '--input', test_file_path, '--output', 'test_result',
                     '--classifier', 'me-model']
 
-    o = subprocess.Popen(import_command, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
-    o = subprocess.Popen(train_classifier_command, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
-    o = subprocess.Popen(test_command, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+    o = subprocess.call(import_command)
+    o = subprocess.call(train_classifier_command)
+    o = subprocess.call(test_command)
     # TODO: 1. write final_test.vectors.txt and run mallet commands 
     # 2. comma in different files
     # 3. confirm containXX number
