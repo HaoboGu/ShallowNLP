@@ -5,6 +5,8 @@ import re
 from operator import itemgetter
 import os
 import subprocess
+import time
+
 
 def add_count2dictionary(key, dict):
     if key in dict:
@@ -190,6 +192,7 @@ def cal_accuracy():
     return 0
 
 if __name__ == "__main__":
+    start = time.time()
     parser = OptionParser(__doc__)
     options, args = parser.parse_args()
     use_local_file = 0
@@ -246,6 +249,8 @@ if __name__ == "__main__":
 
     stdout_file.close()
     stderr_file.close()
+    end = time.time()
+    print('running time: ', end-start)
     # TODO: 1. write final_test.vectors.txt and run mallet commands
     # 2. comma in different files
     # 3. confirm containXX number
