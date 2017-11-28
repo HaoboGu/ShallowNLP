@@ -234,13 +234,14 @@ if __name__ == "__main__":
                                 '--output-classifier', me_model_path, '--trainer', 'MaxEnt']
 
     test_command = ['mallet', 'classify-file', '--input', test_txt_path, '--output', test_result_path,
-                    '--classifier', 'me-model']
+                    '--classifier', me_model_path]
 
     # run commands
     stdout_file = open(output_dir+'/me_model.stdout', 'w')
     stderr_file = open(output_dir+'/me_model.stderr', 'w')
     o = subprocess.call(import_command)
     o = subprocess.call(train_classifier_command, stdout=stdout_file, stderr=stderr_file)
+    print('training finished')
     o = subprocess.call(test_command)
 
     stdout_file.close()
