@@ -227,18 +227,24 @@ if __name__ == "__main__":
     train_vector_path = os.path.join(output_dir, "final_train.vectors")
     test_txt_path = os.path.join(output_dir, "final_test.vectors.txt")
     test_result_path = os.path.join(output_dir, "sys_out")
+    me_model_path = os.path.join(output_dir, "me-model")
     # set shell commands
     import_command = ['mallet', 'import-file', '--input', train_txt_path, '--output', train_vector_path]
     train_classifier_command = ['mallet', 'train-classifier', '--input', train_vector_path,
-                                '--output-classifier', 'me-model', '--trainer', 'MaxEnt',
-                                '>', 'me_model.stdout', '2', '>', 'me_model.stderr']
+                                '--output-classifier', me_model_path, '--trainer', 'MaxEnt']
+
     test_command = ['mallet', 'classify-file', '--input', test_txt_path, '--output', test_result_path,
                     '--classifier', 'me-model']
 
     # run commands
+    stdout_file = open(output_dir+'/me_model.stdout', 'w')
+    stderr_file = open(output_dir+'/me_model.stderr', 'w')
     o = subprocess.call(import_command)
-    o = subprocess.call(train_classifier_command)
+    o = subprocess.call(train_classifier_command, stdout=stdout_file, stderr=stderr_file)
     o = subprocess.call(test_command)
+
+    stdout_file.close()
+    stderr_file.close()
     # TODO: 1. write final_test.vectors.txt and run mallet commands
     # 2. comma in different files
     # 3. confirm containXX number
