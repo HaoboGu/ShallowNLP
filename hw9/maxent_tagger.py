@@ -75,7 +75,6 @@ def set_features(i, wp_pairs, feature_count):
     return word_feat_dict
 
 
-
 def read_data(train_filename):
     f = open(train_filename)
     line = f.readline().strip('\n')
@@ -158,6 +157,7 @@ def proc_test_features(test_features, kept_feature_count):
         kept_test_features.append([word, kept_word_feature_dict, word_num, pos])
     return kept_test_features
 
+
 def write_train_voc(word_count, output_dir, filename):
     output_filename = os.path.join(output_dir, filename)
     f = open(output_filename, 'w')
@@ -180,7 +180,7 @@ def write_vectors(word_features, output_dir, filename):
     f = open(output_filename, 'w')
     for word, word_feature_dict, word_num, pos in word_features:
         out_string = word_num + '-' + word + ' ' + pos
-        for fea in word_feature_dict:
+        for fea in sorted(word_feature_dict):
             out_string = out_string + ' ' + fea + ' ' + str(word_feature_dict[fea])
         f.write(out_string+'\n')
     f.close()
@@ -227,7 +227,7 @@ if __name__ == "__main__":
     train_vector_path = os.path.join(output_dir, "final_train.vectors")
     test_txt_path = os.path.join(output_dir, "final_test.vectors.txt")
     test_result_path = os.path.join(output_dir, "sys_out")
-    me_model_path = os.path.join(output_dir, "me-model")
+    me_model_path = os.path.join(output_dir, "me_model")
     # set shell commands
     import_command = ['mallet', 'import-file', '--input', train_txt_path, '--output', train_vector_path]
     train_classifier_command = ['mallet', 'train-classifier', '--input', train_vector_path,
