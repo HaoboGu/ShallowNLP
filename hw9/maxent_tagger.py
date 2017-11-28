@@ -186,6 +186,9 @@ def write_vectors(word_features, output_dir, filename):
     f.close()
 
 
+def cal_accuracy():
+    return 0
+
 if __name__ == "__main__":
     parser = OptionParser(__doc__)
     options, args = parser.parse_args()
@@ -219,15 +222,20 @@ if __name__ == "__main__":
     kept_test_features = proc_test_features(all_test_features, kept_feature_count)
     write_vectors(kept_test_features, output_dir, "final_test.vectors.txt")
 
+    # set paths used in shell commands
     train_txt_path = os.path.join(output_dir, "final_train.vectors.txt")
     train_vector_path = os.path.join(output_dir, "final_train.vectors")
+    test_txt_path = os.path.join(output_dir, "final_test.vectors.txt")
+    test_result_path = os.path.join(output_dir, "sys_out")
+    # set shell commands
     import_command = ['mallet', 'import-file', '--input', train_txt_path, '--output', train_vector_path]
     train_classifier_command = ['mallet', 'train-classifier', '--input', train_vector_path,
-                                '--output-classifier', 'me-model', '--trainer', 'MaxEnt']
-    test_txt_path = os.path.join(output_dir, "final_test.vectors.txt")
-    test_command = ['mallet', 'classify-file', '--input', test_txt_path, '--output', 'test_result',
+                                '--output-classifier', 'me-model', '--trainer', 'MaxEnt',
+                                '>', 'me_model.stdout', '2', '>', 'me_model.stderr']
+    test_command = ['mallet', 'classify-file', '--input', test_txt_path, '--output', test_result_path,
                     '--classifier', 'me-model']
 
+    # run commands
     o = subprocess.call(import_command)
     o = subprocess.call(train_classifier_command)
     o = subprocess.call(test_command)
