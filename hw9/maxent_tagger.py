@@ -18,8 +18,8 @@ def set_features(i, wp_pairs, feature_count):
     """
     Set 6 common features for rare and non-rare words.
     The 6 features are: prevT, prevTwoTags, prevW, prev2W, nextW, next2W.
-    :param i:
-    :param wp_pairs:
+    :param i: word's index in the sentence
+    :param wp_pairs: word/pos pair
     :return:
     """
     word_feat_dict = {}
@@ -75,10 +75,11 @@ def set_features(i, wp_pairs, feature_count):
     return word_feat_dict
 
 
+
 def read_data(train_filename):
     f = open(train_filename)
     line = f.readline().strip('\n')
-    features = []  # (word, word's fetures) pair
+    features = []  # (word, word's features, word_num, word's pos) tuples
     word_count = {}  # word count dictionary
     feature_count = {}
     sentence_num = 1
@@ -90,7 +91,6 @@ def read_data(train_filename):
         for index in range(0, wp_pairs.__len__()):
             word, pos = wp_pairs[index].split('/')
             word = word.replace('*\\*', '\\/')
-
             word_feat_dict = set_features(index, wp_pairs, feature_count)
             word_num = str(sentence_num)+'-'+str(index)
             features.append([word, word_feat_dict, word_num, pos])
@@ -101,14 +101,6 @@ def read_data(train_filename):
     return word_count, feature_count, features
 
 
-def read_test_data(test_filename, feature_count):
-    """
-    Read test data, but we only keep the non-rare features obtained from training data.
-    :param test_filename:
-    :param feature_count:
-    :return:
-    """
-
 def proc_rare_word(word_count, feature_count, features, rare_thres):
     new_features = []
     uppercase_pattern = re.compile(r"[A-Z]")
@@ -116,23 +108,6 @@ def proc_rare_word(word_count, feature_count, features, rare_thres):
     hyphen_pattern = re.compile(r"-")
     for word, word_feature_dict, word_num, pos in features:
         if word_count[word] < rare_thres:
-            # rare word!
-            # if uppercase_pattern.match(word):
-            #     word_feature_dict["containUC"] = 1
-            # else:
-            #     word_feature_dict["containUC"] = 0
-            # add_count2dictionary("containUC", feature_count)
-            # if number_pattern.match(word):
-            #     word_feature_dict["containNum"] = 1
-            # else:
-            #     word_feature_dict["containNum"] = 0
-            # add_count2dictionary("containNum", feature_count)
-            # if hyphen_pattern.match(word):
-            #     word_feature_dict["containHyp"] = 1
-            # else:
-            #     word_feature_dict["containHyp"] = 0
-            # add_count2dictionary("containHyp", feature_count)
-
             if uppercase_pattern.match(word):
                 word_feature_dict["containUC"] = 1
                 add_count2dictionary("containUC", feature_count)
@@ -172,6 +147,14 @@ def remove_rare_features(features, feature_count, feat_thres):
         new_features.append([word, new_word_feature_dict, word_num, pos])
     return new_features, new_feature_count
 
+
+def proc_test_features(test_features, kept_feature_count):
+    kept_test_features = []
+    for word, word_feature_dict, word_num, pos in test_features:
+        for fea in word_feature_dict:
+            if fea in kept_feature_count:
+                kept_test_features.append([word, word_feature_dict, word_num, pos])
+    return kept_test_features
 
 def write_train_voc(word_count, output_dir, filename):
     output_filename = os.path.join(output_dir, filename)
@@ -222,25 +205,25 @@ if __name__ == "__main__":
     # read and process training data
     word_count, feature_count, features = read_data(train_filename)
     write_train_voc(word_count, output_dir, "train_voc")
-    features = proc_rare_word(word_count, feature_count, features, rare_thres)
+    all_features = proc_rare_word(word_count, feature_count, features, rare_thres)
     write_feats(feature_count, output_dir, "init_feats")
-    features, new_feature_count = remove_rare_features(features, feature_count, feat_thres)
-    write_feats(new_feature_count, output_dir, "kept_feats")
-    write_vectors(features, output_dir, "final_train.vectors.txt")
+    kept_features, kept_feature_count = remove_rare_features(all_features, feature_count, feat_thres)
+    write_feats(kept_feature_count, output_dir, "kept_feats")
+    write_vectors(kept_features, output_dir, "final_train.vectors.txt")
 
     # read and process testing data
     test_word_count, test_feature_count, test_features = read_data(test_filename)
-    test_features = proc_rare_word(test_word_count, test_feature_count, test_features, rare_thres)
-    test_features, test_new_feature_count = remove_rare_features(test_features, test_feature_count, feat_thres)
-    write_vectors(test_features, output_dir, "final_test.vectors.txt")
+    all_test_features = proc_rare_word(test_word_count, test_feature_count, test_features, rare_thres)
+    kept_test_features = proc_test_features(all_test_features, kept_feature_count)
+    write_vectors(kept_test_features, output_dir, "final_test.vectors.txt")
 
-    train_file_path = os.path.join(output_dir, "final_train.vectors.txt")
-    train_output_path = os.path.join(output_dir, "final_train.vectors")
-    import_command = ['mallet', 'import-file', '--input', train_file_path, '--output', train_output_path]
-    train_classifier_command = ['mallet', 'train-classifier', '--input', train_output_path,
+    train_txt_path = os.path.join(output_dir, "final_train.vectors.txt")
+    train_vector_path = os.path.join(output_dir, "final_train.vectors")
+    import_command = ['mallet', 'import-file', '--input', train_txt_path, '--output', train_vector_path]
+    train_classifier_command = ['mallet', 'train-classifier', '--input', train_vector_path,
                                 '--output-classifier', 'me-model', '--trainer', 'MaxEnt']
-    test_file_path = os.path.join(output_dir, "final_test.vectors.txt")
-    test_command = ['mallet', 'classify-file', '--input', test_file_path, '--output', 'test_result',
+    test_txt_path = os.path.join(output_dir, "final_test.vectors.txt")
+    test_command = ['mallet', 'classify-file', '--input', test_txt_path, '--output', 'test_result',
                     '--classifier', 'me-model']
 
     o = subprocess.call(import_command)
@@ -248,7 +231,7 @@ if __name__ == "__main__":
     print("************* start test stage ********************")
     o = subprocess.Popen(test_command, stdout=subprocess.PIPE)
     outs, errs = o.communicate()
-    print(outs)
+    print(outs, errs)
     # TODO: 1. write final_test.vectors.txt and run mallet commands 
     # 2. comma in different files
     # 3. confirm containXX number
