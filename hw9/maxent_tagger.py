@@ -234,7 +234,8 @@ if __name__ == "__main__":
     me_model_path = os.path.join(output_dir, "me_model")
     # set shell commands
     import_training_command = ['mallet', 'import-file', '--input', train_txt_path, '--output', train_vector_path]
-    import_testing_command = ['mallet', 'import-file', '--input', test_txt_path, '--output', test_vector_path]
+    import_testing_command = ['mallet', 'import-file', '--input', test_txt_path, '--output', test_vector_path,
+                              '--use-pipe-from', train_vector_path]
     # train_classifier_command = ['mallet', 'train-classifier', '--input', train_vector_path,
     #                             '--output-classifier', me_model_path, '--trainer', 'MaxEnt']
 
@@ -245,6 +246,7 @@ if __name__ == "__main__":
     stdout_file = open(output_dir+'/me_model.stdout', 'w')
     stderr_file = open(output_dir+'/me_model.stderr', 'w')
     o = subprocess.call(import_training_command)
+    o = subprocess.call(import_testing_command)
     o = subprocess.call(test_command, stdout=stdout_file, stderr=stderr_file)
 
     stdout_file.close()
