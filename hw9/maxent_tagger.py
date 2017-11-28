@@ -151,9 +151,11 @@ def remove_rare_features(features, feature_count, feat_thres):
 def proc_test_features(test_features, kept_feature_count):
     kept_test_features = []
     for word, word_feature_dict, word_num, pos in test_features:
+        kept_word_feature_dict = {}
         for fea in word_feature_dict:
             if fea in kept_feature_count:
-                kept_test_features.append([word, word_feature_dict, word_num, pos])
+                kept_word_feature_dict[fea] = word_feature_dict[fea]
+        kept_test_features.append([word, kept_word_feature_dict, word_num, pos])
     return kept_test_features
 
 def write_train_voc(word_count, output_dir, filename):
@@ -228,11 +230,8 @@ if __name__ == "__main__":
 
     o = subprocess.call(import_command)
     o = subprocess.call(train_classifier_command)
-    print("************* start test stage ********************")
-    o = subprocess.Popen(test_command, stdout=subprocess.PIPE)
-    outs, errs = o.communicate()
-    print(outs, errs)
-    # TODO: 1. write final_test.vectors.txt and run mallet commands 
+    o = subprocess.call(test_command)
+    # TODO: 1. write final_test.vectors.txt and run mallet commands
     # 2. comma in different files
     # 3. confirm containXX number
     # 4. confirm the order of features
