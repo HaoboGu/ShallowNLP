@@ -111,13 +111,13 @@ def proc_rare_word(word_count, feature_count, features, rare_thres):
         if word_count[word] < rare_thres:
             if uppercase_pattern.match(word):
                 word_feature_dict["containUC"] = 1
-                add_count2dictionary("containUC", feature_count)
+            add_count2dictionary("containUC", feature_count)
             if number_pattern.match(word):
                 word_feature_dict["containNum"] = 1
-                add_count2dictionary("containNum", feature_count)
+            add_count2dictionary("containNum", feature_count)
             if hyphen_pattern.match(word):
                 word_feature_dict["containHyp"] = 1
-                add_count2dictionary("containHyp", feature_count)
+            add_count2dictionary("containHyp", feature_count)
             word_len = len(word)
             for i in range(0, 4):
                 # 4 characters are considered, prefix and suffix may overlap with each other
