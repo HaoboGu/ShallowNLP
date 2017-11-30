@@ -108,29 +108,50 @@ def proc_rare_word(word_count, feature_count, features, rare_thres):
     number_pattern = re.compile(r"[0-9]")
     hyphen_pattern = re.compile(r"-")
     for word, word_feature_dict, word_num, pos in features:
-        if word_count[word] < rare_thres:
+        if word in word_count:
+            if word_count[word] < rare_thres:
+                if uppercase_pattern.match(word):
+                    word_feature_dict["containUC"] = 1
+                    add_count2dictionary("containUC", feature_count)
+                if number_pattern.match(word):
+                    word_feature_dict["containNum"] = 1
+                    add_count2dictionary("containNum", feature_count)
+                if hyphen_pattern.match(word):
+                    word_feature_dict["containHyp"] = 1
+                    add_count2dictionary("containHyp", feature_count)
+                word_len = len(word)
+                for i in range(0, 4):
+                    # 4 characters are considered, prefix and suffix may overlap with each other
+                    if i < word_len:  # add prefix features
+                        word_feature_dict["pref="+word[:i+1]] = 1
+                        add_count2dictionary("pref="+word[:i+1], feature_count)
+                    if word_len-i > 0:  # add suffix features
+                        word_feature_dict["suf="+word[word_len-i-1:]] = 1
+                        add_count2dictionary("suf="+word[word_len-i-1:], feature_count)
+            else:
+                # non-rare word!
+                word_feature_dict["curW="+word] = 1
+                add_count2dictionary("curW="+word, feature_count)
+        else:
+            # not in word_count, consider as rare word
             if uppercase_pattern.match(word):
                 word_feature_dict["containUC"] = 1
-            add_count2dictionary("containUC", feature_count)
+                add_count2dictionary("containUC", feature_count)
             if number_pattern.match(word):
                 word_feature_dict["containNum"] = 1
-            add_count2dictionary("containNum", feature_count)
+                add_count2dictionary("containNum", feature_count)
             if hyphen_pattern.match(word):
                 word_feature_dict["containHyp"] = 1
-            add_count2dictionary("containHyp", feature_count)
+                add_count2dictionary("containHyp", feature_count)
             word_len = len(word)
             for i in range(0, 4):
                 # 4 characters are considered, prefix and suffix may overlap with each other
                 if i < word_len:  # add prefix features
-                    word_feature_dict["pref="+word[:i+1]] = 1
-                    add_count2dictionary("pref="+word[:i+1], feature_count)
-                if word_len-i > 0:  # add suffix features
-                    word_feature_dict["suf="+word[word_len-i-1:]] = 1
-                    add_count2dictionary("suf="+word[word_len-i-1:], feature_count)
-        else:
-            # non-rare word!
-            word_feature_dict["curW="+word] = 1
-            add_count2dictionary("curW="+word, feature_count)
+                    word_feature_dict["pref=" + word[:i + 1]] = 1
+                    add_count2dictionary("pref=" + word[:i + 1], feature_count)
+                if word_len - i > 0:  # add suffix features
+                    word_feature_dict["suf=" + word[word_len - i - 1:]] = 1
+                    add_count2dictionary("suf=" + word[word_len - i - 1:], feature_count)
         new_features.append([word, word_feature_dict, word_num, pos])
     return new_features
 
@@ -222,7 +243,8 @@ if __name__ == "__main__":
 
     # read and process testing data
     test_word_count, test_feature_count, test_features = read_data(test_filename)
-    all_test_features = proc_rare_word(test_word_count, test_feature_count, test_features, rare_thres)
+    # TODO: all unknown words in test should be regarded as unknown word.
+    all_test_features = proc_rare_word(word_count, test_feature_count, test_features, rare_thres)
     kept_test_features = proc_test_features(all_test_features, kept_feature_count)
     write_vectors(kept_test_features, output_dir, "final_test.vectors.txt")
 
@@ -256,5 +278,4 @@ if __name__ == "__main__":
     stderr_file.close()
     end = time.time()
     print('running time: ', end-start)
-    # TODO: confirm containXX number
 
