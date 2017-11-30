@@ -29,22 +29,22 @@ def set_features(i, wp_pairs, feature_count):
     if i == 0:  # first word of the sentence
         word_feat_dict["prevT=BOS"] = 1
         word_feat_dict["prevTwoTags=BOS+BOS"] = 1
-        word_feat_dict["prevW=<s>"] = 1
-        word_feat_dict["prev2W=<s>"] = 1
+        word_feat_dict["prevW=BOS"] = 1
+        word_feat_dict["prev2W=BOS"] = 1
         add_count2dictionary("prevT=BOS", feature_count)
         add_count2dictionary("prevTwoTags=BOS+BOS", feature_count)
-        add_count2dictionary("prevW=<s>", feature_count)
-        add_count2dictionary("prev2W=<s>", feature_count)
+        add_count2dictionary("prevW=BOS", feature_count)
+        add_count2dictionary("prev2W=BOS", feature_count)
     elif i == 1:  # second word of the sentence
         prev_w, prev_p = wp_pairs[0].split('/')
         word_feat_dict["prevT="+prev_p] = 1
         word_feat_dict["prevTwoTags=BOS+"+prev_p] = 1
         word_feat_dict["prevW="+prev_w] = 1
-        word_feat_dict["prev2W=<s>"] = 1
+        word_feat_dict["prev2W=BOS"] = 1
         add_count2dictionary("prevT="+prev_p, feature_count)
         add_count2dictionary("prevTwoTags=BOS+"+prev_p, feature_count)
         add_count2dictionary("prevW="+prev_w, feature_count)
-        add_count2dictionary("prev2W=<s>", feature_count)
+        add_count2dictionary("prev2W=BOS", feature_count)
     else:  # other words in the sentence
         prev_w, prev_p = wp_pairs[i-1].split('/')
         prev_2w, prev_2p = wp_pairs[i-2].split('/')
@@ -57,16 +57,16 @@ def set_features(i, wp_pairs, feature_count):
         add_count2dictionary("prevW="+prev_w, feature_count)
         add_count2dictionary("prev2W="+prev_2w, feature_count)
     if i == length-1:  # last word of the sentence
-        word_feat_dict["nextW=</s>"] = 1
-        word_feat_dict["next2W=</s>"] = 1
-        add_count2dictionary("nextW=</s>", feature_count)
-        add_count2dictionary("next2W=</s>", feature_count)
+        word_feat_dict["nextW=EOS"] = 1
+        word_feat_dict["next2W=EOS"] = 1
+        add_count2dictionary("nextW=EOS", feature_count)
+        add_count2dictionary("next2W=EOS", feature_count)
     elif i == length-2:  # the second last word of the sentence
         next_w = wp_pairs[length-1].split('/')[0]
         word_feat_dict["nextW="+next_w] = 1
-        word_feat_dict["next2W=</s>"] = 1
+        word_feat_dict["next2W=EOS"] = 1
         add_count2dictionary("nextW="+next_w, feature_count)
-        add_count2dictionary("next2W=</s>", feature_count)
+        add_count2dictionary("next2W=EOS", feature_count)
     else:  # other words of the sentence
         next_w = wp_pairs[i+1].split('/')[0]
         next_2w = wp_pairs[i+2].split('/')[0]
@@ -87,7 +87,7 @@ def read_data(train_filename):
     while line:
         line = re.sub(" +", " ", line)  # Eliminate redundant spaces
         line = line.replace('\\/', '*\\*')  # use *\* to replace / in word, because we split word and pos using /
-        line = line.replace(',', 'comma')
+        # line = line.replace(',', 'comma')
         wp_pairs = line.split(' ')  # a list of word/pos pairs
         for index in range(0, wp_pairs.__len__()):
             word, pos = wp_pairs[index].split('/')
@@ -184,6 +184,7 @@ def write_vectors(word_features, output_dir, filename):
         out_string = word_num + '-' + word + ' ' + pos
         for fea in sorted(word_feature_dict):
             out_string = out_string + ' ' + fea + ' ' + str(word_feature_dict[fea])
+        out_string = out_string.replace(',', 'comma')
         f.write(out_string+'\n')
     f.close()
 
@@ -239,23 +240,21 @@ if __name__ == "__main__":
     # train_classifier_command = ['mallet', 'train-classifier', '--input', train_vector_path,
     #                             '--output-classifier', me_model_path, '--trainer', 'MaxEnt']
 
-    test_command = ['vectors2classify', '--training-file', train_vector_path, '--testing-file', test_vector_path,
+    train_and_test_command = ['vectors2classify', '--training-file', train_vector_path, '--testing-file', test_vector_path,
                     '--trainer', 'MaxEnt', '--output-classifier', me_model_path]
+    generate_test_result_command = ['mallet', 'classify-file', '--input', test_txt_path, '--classifier', me_model_path,
+                                    '--output', test_result_path]
 
     # run commands
     stdout_file = open(output_dir+'/me_model.stdout', 'w')
     stderr_file = open(output_dir+'/me_model.stderr', 'w')
     o = subprocess.call(import_training_command)
     o = subprocess.call(import_testing_command)
-    o = subprocess.call(test_command, stdout=stdout_file, stderr=stderr_file)
-
+    o = subprocess.call(train_and_test_command, stdout=stdout_file, stderr=stderr_file)
+    o = subprocess.call(generate_test_result_command)
     stdout_file.close()
     stderr_file.close()
     end = time.time()
     print('running time: ', end-start)
-    # TODO: 1. write final_test.vectors.txt and run mallet commands
-    # 2. comma in different files
-    # 3. confirm containXX number
-    # 4. confirm the order of features
-    # 5. confirm the representation of BOS
-    
+    # TODO: confirm containXX number
+
