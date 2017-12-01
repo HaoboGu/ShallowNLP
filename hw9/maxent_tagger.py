@@ -104,19 +104,19 @@ def read_data(train_filename):
 
 def proc_rare_word(word_count, feature_count, features, rare_thres):
     new_features = []
-    uppercase_pattern = re.compile(r"[A-Z]")
-    number_pattern = re.compile(r"[0-9]")
-    hyphen_pattern = re.compile(r"-")
+    uppercase_pattern = re.compile(r"[A-Z]+")
+    number_pattern = re.compile(r"[0-9]+")
+    hyphen_pattern = re.compile(r"-+")
     for word, word_feature_dict, word_num, pos in features:
         if word in word_count:
             if word_count[word] < rare_thres:
-                if uppercase_pattern.match(word):
+                if uppercase_pattern.search(word):
                     word_feature_dict["containUC"] = 1
                     add_count2dictionary("containUC", feature_count)
-                if number_pattern.match(word):
+                if number_pattern.search(word):
                     word_feature_dict["containNum"] = 1
                     add_count2dictionary("containNum", feature_count)
-                if hyphen_pattern.match(word):
+                if hyphen_pattern.search(word):
                     word_feature_dict["containHyp"] = 1
                     add_count2dictionary("containHyp", feature_count)
                 word_len = len(word)
@@ -134,13 +134,13 @@ def proc_rare_word(word_count, feature_count, features, rare_thres):
                 add_count2dictionary("curW="+word, feature_count)
         else:
             # not in word_count, consider as rare word
-            if uppercase_pattern.match(word):
+            if uppercase_pattern.search(word):
                 word_feature_dict["containUC"] = 1
                 add_count2dictionary("containUC", feature_count)
-            if number_pattern.match(word):
+            if number_pattern.search(word):
                 word_feature_dict["containNum"] = 1
                 add_count2dictionary("containNum", feature_count)
-            if hyphen_pattern.match(word):
+            if hyphen_pattern.search(word):
                 word_feature_dict["containHyp"] = 1
                 add_count2dictionary("containHyp", feature_count)
             word_len = len(word)
@@ -238,6 +238,7 @@ if __name__ == "__main__":
     all_features = proc_rare_word(word_count, feature_count, features, rare_thres)
     write_feats(feature_count, output_dir, "init_feats")
     kept_features, kept_feature_count = remove_rare_features(all_features, feature_count, feat_thres)
+    print()
     write_feats(kept_feature_count, output_dir, "kept_feats")
     write_vectors(kept_features, output_dir, "final_train.vectors.txt")
 
