@@ -37,6 +37,7 @@ def set_features(i, wp_pairs, feature_count):
         add_count2dictionary("prev2W=BOS", feature_count)
     elif i == 1:  # second word of the sentence
         prev_w, prev_p = wp_pairs[0].split('/')
+        prev_w = prev_w.replace('*\\*', '\\/')
         word_feat_dict["prevT="+prev_p] = 1
         word_feat_dict["prevTwoTags=BOS+"+prev_p] = 1
         word_feat_dict["prevW="+prev_w] = 1
@@ -48,6 +49,8 @@ def set_features(i, wp_pairs, feature_count):
     else:  # other words in the sentence
         prev_w, prev_p = wp_pairs[i-1].split('/')
         prev_2w, prev_2p = wp_pairs[i-2].split('/')
+        prev_w = prev_w.replace('*\\*', '\\/')
+        prev_2w = prev_2w.replace('*\\*', '\\/')
         word_feat_dict["prevT="+prev_p] = 1
         word_feat_dict["prevTwoTags="+prev_2p+"+"+prev_p] = 1
         word_feat_dict["prevW="+prev_w] = 1
@@ -63,6 +66,7 @@ def set_features(i, wp_pairs, feature_count):
         add_count2dictionary("next2W=EOS", feature_count)
     elif i == length-2:  # the second last word of the sentence
         next_w = wp_pairs[length-1].split('/')[0]
+        next_w = next_w.replace('*\\*', '\\/')
         word_feat_dict["nextW="+next_w] = 1
         word_feat_dict["next2W=EOS"] = 1
         add_count2dictionary("nextW="+next_w, feature_count)
@@ -70,6 +74,8 @@ def set_features(i, wp_pairs, feature_count):
     else:  # other words of the sentence
         next_w = wp_pairs[i+1].split('/')[0]
         next_2w = wp_pairs[i+2].split('/')[0]
+        next_w = next_w.replace('*\\*', '\\/')
+        next_2w = next_2w.replace('*\\*', '\\/')
         word_feat_dict["nextW="+next_w] = 1
         word_feat_dict["next2W=" + next_2w] = 1
         add_count2dictionary("nextW="+next_w, feature_count)
