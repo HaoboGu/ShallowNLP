@@ -250,7 +250,6 @@ if __name__ == "__main__":
 
     # read and process testing data
     test_word_count, test_feature_count, test_features = read_data(test_filename)
-    # TODO: all unknown words in test should be regarded as unknown word.
     all_test_features = proc_rare_word(word_count, test_feature_count, test_features, rare_thres)
     kept_test_features = proc_test_features(all_test_features, kept_feature_count)
     write_vectors(kept_test_features, output_dir, "final_test.vectors.txt")
