@@ -244,7 +244,6 @@ if __name__ == "__main__":
     all_features = proc_rare_word(word_count, feature_count, features, rare_thres)
     write_feats(feature_count, output_dir, "init_feats")
     kept_features, kept_feature_count = remove_rare_features(all_features, feature_count, feat_thres)
-    print()
     write_feats(kept_feature_count, output_dir, "kept_feats")
     write_vectors(kept_features, output_dir, "final_train.vectors.txt")
 
