@@ -1,14 +1,12 @@
 # !/usr/bin/python
 
 from optparse import OptionParser
-import re
 from operator import itemgetter
 import os
-import subprocess
 import time
 import math
 from scipy import spatial
-
+import numpy
 
 def normalize(vector):
     """
@@ -76,55 +74,75 @@ def find_closest_word(predict_vector, embedding, sim_flag):
     :param sim_flag: indicate which similarity function to use
     :return:
     """
-    # s = time.time()
-    closest_word = list(embedding.keys())[0]
-    best_distance = math.sqrt(sum([(a-b)**2 for a, b in zip(predict_vector, embedding[closest_word])]))
-    for item in embedding:
-        if sim_flag == 0:
-            # Use euclidean distance
-            distance = math.sqrt(sum([(a-b)**2 for a, b in zip(predict_vector, embedding[item])]))
-        else:
-            # Use cosine similarity
-            distance = spatial.distance.cosine(predict_vector, embedding[item])
-        if distance < best_distance:
-                closest_word = item
-                best_distance = distance
-    # e = time.time()
-    # print(e - s, 's')
-    return closest_word
+    vector1 = numpy.array([predict_vector])
+    vector2 = numpy.array(list(embedding.values()))
+    keys = numpy.array(list(embedding.keys()))
+    re = spatial.distance.cdist(vector1, vector2)
+    return keys[numpy.argmin(re)]
 
 
 def process_data(in_dir, out_dir, sim_flag, embedding):
+    results = []
+
     for filename in os.listdir(in_dir):
         in_file = open(in_dir + '/' + filename)
         out_file = open(out_dir + '/' + filename, 'w')
         input_line = in_file.readline().strip('\n')
+        predicted = []
+        correspond_word = []
         while input_line:
             a, b, c, d = input_line.split(' ')
             a_ebd = find_embedding(a, embedding)
             b_ebd = find_embedding(b, embedding)
             c_ebd = find_embedding(c, embedding)
-            predict_d_ebd = [b-a+c for a, b, c in zip(a_ebd, b_ebd, c_ebd)]
-            predict_word = find_closest_word(predict_d_ebd, embedding, sim_flag)
-            output_string = a + ' ' + b + ' ' + c + ' ' #+ predict_word + '\n'
-            out_file.write(output_string)
+            predict_d = [b-a+c for a, b, c in zip(a_ebd, b_ebd, c_ebd)]
+            predicted.append(predict_d)
+            correspond_word.append([a, b, c, d])
             input_line = in_file.readline().strip('\n')
-        print(filename, " processed")
+        vector2 = numpy.array(list(embedding.values()))
+        keys = numpy.array(list(embedding.keys()))
+        if sim_flag == 0:
+            # Use euclidean distance
+            dis_matrix = spatial.distance.cdist(predicted, vector2)  # compute distance matrix
+        else:
+            # Use cosine distance
+            dis_matrix = spatial.distance.cdist(predicted, vector2, metric='cosine')  # compute distance matrix
+        tp = 0
+        for index in range(0, dis_matrix.shape[0]):
+            predict_word = keys[numpy.argmin(dis_matrix[index])]
+            aa = correspond_word[index][0]
+            bb = correspond_word[index][1]
+            cc = correspond_word[index][2]
+            if predict_word == correspond_word[index][3]:
+                tp += 1
+            output_string = aa + ' ' + bb + ' ' + cc + ' ' + predict_word + '\n'
+            out_file.write(output_string)
+        results.append([filename, tp, dis_matrix.shape[0]])
+        # print(tp, dis_matrix.shape[0], tp/dis_matrix.shape[0])
         in_file.close()
         out_file.close()
+
+    total_tp = 0
+    total_samples = 0
+    for item in sorted(results, key=itemgetter(0)):
+        print(item[0]+':')
+        total_tp += item[1]
+        total_samples += item[2]
+        print("ACCURACY TOP1:", '{:.2%}'.format(item[1]/item[2]), '('+str(item[1])+'/'+str(item[2])+')')
+    print("\nTotal accuracy:", '{:.2%}'.format(total_tp/total_samples), '('+str(total_tp)+'/'+str(total_samples)+')')
 
 
 if __name__ == "__main__":
     start = time.time()
     parser = OptionParser(__doc__)
     options, args = parser.parse_args()
-    use_local_file = 1
+    use_local_file = 0
     if use_local_file:
         vector_filename = "examples/vectors.txt"
         input_dir = "examples/question-data"
-        output_dir = "exp00"
-        flag1 = 0
-        flag2 = 0
+        output_dir = "exp11"
+        flag1 = 1
+        flag2 = 1
     else:
         vector_filename = args[0]
         input_dir = args[1]
@@ -134,8 +152,6 @@ if __name__ == "__main__":
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     word_embedding = read_vectors(vector_filename, flag1)
-    print(word_embedding.__len__())
     process_data(input_dir, output_dir, flag2, word_embedding)
     end = time.time()
-    print(end - start)
-    
+    # print(end - start)
