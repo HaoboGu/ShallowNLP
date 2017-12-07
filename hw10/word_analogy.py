@@ -3,10 +3,10 @@
 from optparse import OptionParser
 from operator import itemgetter
 import os
-import time
 import math
 from scipy import spatial
 import numpy
+
 
 def normalize(vector):
     """
@@ -65,22 +65,6 @@ def find_embedding(word, embedding_dict):
         return [0] * 50
 
 
-def find_closest_word(predict_vector, embedding, sim_flag):
-    """
-    Find closest word of predicted vector. If sim_flag = 0, Euclidean distance is used. Otherwise, cosine similarity
-    is used
-    :param predict_vector:
-    :param embedding:
-    :param sim_flag: indicate which similarity function to use
-    :return:
-    """
-    vector1 = numpy.array([predict_vector])
-    vector2 = numpy.array(list(embedding.values()))
-    keys = numpy.array(list(embedding.keys()))
-    re = spatial.distance.cdist(vector1, vector2)
-    return keys[numpy.argmin(re)]
-
-
 def process_data(in_dir, out_dir, sim_flag, embedding):
     results = []
 
@@ -118,7 +102,6 @@ def process_data(in_dir, out_dir, sim_flag, embedding):
             output_string = aa + ' ' + bb + ' ' + cc + ' ' + predict_word + '\n'
             out_file.write(output_string)
         results.append([filename, tp, dis_matrix.shape[0]])
-        # print(tp, dis_matrix.shape[0], tp/dis_matrix.shape[0])
         in_file.close()
         out_file.close()
 
@@ -133,7 +116,6 @@ def process_data(in_dir, out_dir, sim_flag, embedding):
 
 
 if __name__ == "__main__":
-    start = time.time()
     parser = OptionParser(__doc__)
     options, args = parser.parse_args()
     use_local_file = 0
@@ -153,5 +135,3 @@ if __name__ == "__main__":
         os.makedirs(output_dir)
     word_embedding = read_vectors(vector_filename, flag1)
     process_data(input_dir, output_dir, flag2, word_embedding)
-    end = time.time()
-    # print(end - start)
