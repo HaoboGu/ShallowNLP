@@ -1,6 +1,6 @@
 # README
 
-This is the homework repository for LING570: Shaollow techniques for NLP
+This is the homework repository for LING570: Shallow techniques for NLP
 
 
 
